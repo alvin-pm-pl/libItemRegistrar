@@ -12,5 +12,5 @@ libItemRegistrar::getInstance()->registerItem(new class(new ItemIdentifier(ItemT
 	    $player->sendMessage("Hello world!");
 	    return ItemUseResult::SUCCESS();
     }
-}, 392, true); // https://github.com/pmmp/BedrockData/blob/modern-world-support/required_item_list.json#L1843
+}, libItemRegistrar::getInstance()->getRuntimeIdByName("Fishing Rod"), true); // https://github.com/pmmp/BedrockData/blob/modern-world-support/required_item_list.json#L1843
 ```
