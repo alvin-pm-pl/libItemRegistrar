@@ -1,0 +1,5 @@
+name: libItemRegistrar
+author: alvin0319
+main: alvin0319\libItemRegistrar\libItemRegistrar
+version: 1.0.0
+api: 5.0.0
