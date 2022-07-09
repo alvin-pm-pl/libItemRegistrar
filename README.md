@@ -1,6 +1,6 @@
 # libItemRegistrar
 
-A general library-like plugin to manage (custom) items.
+A general library-like plugin to manage (custom) items. (PM5)
 
 # Usage
 
