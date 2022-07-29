@@ -7,20 +7,26 @@ declare(strict_types=1);
 
 namespace alvin0319\libItemRegistrar;
 
+use alvin0319\libItemRegistrar\task\BlockRuntimeIdRegisterTask;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\BlockTypeIds;
+use pocketmine\data\bedrock\block\convert\BlockStateReader;
+use pocketmine\data\bedrock\block\convert\BlockStateWriter;
 use pocketmine\data\bedrock\item\ItemTypeNames;
 use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\item\StringToItemParser;
+use pocketmine\nbt\LittleEndianNbtSerializer;
+use pocketmine\nbt\TreeRoot;
 use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
 use pocketmine\network\mcpe\convert\ItemTypeDictionaryFromDataHelper;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\Utils;
+use pocketmine\world\format\io\GlobalBlockStateHandlers;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
 use Webmozart\PathUtil\Path;
 use function file_get_contents;
@@ -41,8 +47,14 @@ final class libItemRegistrar extends PluginBase{
 
 	private int $nextBlockId = BlockTypeIds::FIRST_UNUSED_BLOCK_ID + 1;
 
+	private static array $blockToRegisterRuntimeId = [];
+
 	protected function onLoad() : void{
 		self::setInstance($this);
+	}
+
+	protected function onEnable() : void{
+		$this->getServer()->getAsyncPool()->submitTask(new BlockRuntimeIdRegisterTask(self::$blockToRegisterRuntimeId));
 	}
 
 	/**
@@ -101,45 +113,29 @@ final class libItemRegistrar extends PluginBase{
 		})->call($dictionary);
 	}
 
-//	public function registerBlock(Block $block, bool $force = false, string $namespace = "", ?\Closure $serializeCallback = null, ?\Closure $deserializeCallback = null) : void{
-//		if($serializeCallback !== null){
-//			Utils::validateCallableSignature(static function(Block $block) : BlockStateWriter{ }, $serializeCallback);
-//		}
-//		if($deserializeCallback !== null){
-//			Utils::validateCallableSignature(static function(BlockStateReader $reader) : Block{ }, $deserializeCallback);
-//		}
-//		BlockFactory::getInstance()->register($block, $force);
-//
-//		$namespace = $namespace === "" ? "minecraft:" . strtolower(str_replace(" ", "_", $block->getName())) : $namespace;
-//
-//		$serializer = GlobalBlockStateHandlers::getSerializer();
-//		$deserializer = GlobalBlockStateHandlers::getDeserializer();
-//
-//		assert($serializer instanceof DelegatingBlockStateSerializer);
-//		assert($deserializer instanceof DelegatingBlockStateDeserializer);
-//
-//		(function() use ($block, $serializeCallback, $namespace) : void{
-//			if(isset($this->serializers[$block->getTypeId()])){
-//				unset($this->serializers[$block->getTypeId()]);
-//			}
-//			$this->map($block, $serializeCallback !== null ? $serializeCallback : static fn() => new BlockStateWriter($namespace));
-//		})->call($serializer->getRealSerializer());
-//
-//		(function() use ($block, $deserializeCallback, $namespace) : void{
-//			if(array_key_exists($namespace, $this->deserializeFuncs)){
-//				unset($this->deserializeFuncs[$namespace]);
-//			}
-//			$this->map($namespace, $deserializeCallback !== null ? $deserializeCallback : static fn(BlockStateReader $reader) : Block => clone $block);
-//		})->call($deserializer->getRealDeserializer());
-//
-//		$blockStateDictionary = RuntimeBlockMapping::getInstance()->getBlockStateDictionary();
-//		(function() use ($block, $namespace) : void{
-//			$cache = $this->stateDataToStateIdLookupCache;
-//			(function() use ($block, $namespace) : void{
-//				$this->nameToNetworkIdsLookup[$namespace] = new BlockStateData($namespace, CompoundTag::create(), $block->getStateId());
-//			})->call($cache);
-//		})->call($blockStateDictionary);
-//	}
+	public function registerBlock(Block $block, bool $force = false, string $namespace = "", ?\Closure $serializeCallback = null, ?\Closure $deserializeCallback = null) : void{
+		if($serializeCallback !== null){
+			Utils::validateCallableSignature(static function(Block $block) : BlockStateWriter{ }, $serializeCallback);
+		}
+		if($deserializeCallback !== null){
+			Utils::validateCallableSignature(static function(BlockStateReader $reader) : Block{ }, $deserializeCallback);
+		}
+
+		$namespace = $namespace === "" ? "minecraft:" . strtolower(str_replace(" ", "_", $block->getName())) : $namespace;
+
+		BlockRuntimeIdRegisterTask::registerBlockToRuntime($block, $namespace, $serializeCallback, $deserializeCallback);
+
+		$serializer = GlobalBlockStateHandlers::getSerializer();
+
+		self::$blockToRegisterRuntimeId[] = [
+			"blockSerialized" => (new LittleEndianNbtSerializer())->write(
+				new TreeRoot($serializer->serialize($block->getStateId())->getStates())
+			),
+			"namespace" => $namespace,
+			"serializeCallback" => $serializeCallback,
+			"deserializeCallback" => $deserializeCallback
+		];
+	}
 
 	/**
 	 * Returns a next item id and increases it.
