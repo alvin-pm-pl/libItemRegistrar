@@ -37,8 +37,6 @@ final class libItemRegistrar extends PluginBase{
 	/** @var Block[] */
 	private array $registeredBlocks = [];
 
-	private int $nextItemId = ItemTypeIds::FIRST_UNUSED_ITEM_ID + 1;
-
 	private int $nextBlockId = BlockTypeIds::FIRST_UNUSED_BLOCK_ID + 1;
 
 	protected function onLoad() : void{
@@ -147,7 +145,7 @@ final class libItemRegistrar extends PluginBase{
 	 * @return int
 	 */
 	public function getNextItemId() : int{
-		return $this->nextItemId++;
+		return ItemTypeIds::newId();
 	}
 
 	public function getNextBlockId() : int{
