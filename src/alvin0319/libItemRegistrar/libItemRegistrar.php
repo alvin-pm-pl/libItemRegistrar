@@ -17,6 +17,7 @@ use pocketmine\item\ItemTypeIds;
 use pocketmine\item\StringToItemParser;
 use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
 use pocketmine\network\mcpe\convert\ItemTypeDictionaryFromDataHelper;
+use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\SingletonTrait;
@@ -97,6 +98,7 @@ final class libItemRegistrar extends PluginBase{
 		(function() use ($item, $runtimeId, $namespace) : void{
 			$this->stringToIntMap[$namespace] = $runtimeId;
 			$this->intToStringMap[$runtimeId] = $namespace;
+			$this->itemTypes[] = new ItemTypeEntry($namespace, $runtimeId, true);
 		})->call($dictionary);
 	}
 
