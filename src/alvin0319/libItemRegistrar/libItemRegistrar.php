@@ -86,11 +86,11 @@ final class libItemRegistrar extends PluginBase{
 		})->call($serializer);
 		// TODO: Closure hack to access ItemDeserializer
 		// ItemDeserializer throws an Exception when we try to register a pre-existing item
-		(function() use ($item, $deserializeCallback) : void{
+		(function() use ($item, $deserializeCallback, $namespace) : void{
 			if(isset($this->deserializers[$item->getName()])){
 				unset($this->deserializers[$item->getName()]);
 			}
-			$this->map($item->getName(), $deserializeCallback !== null ? $deserializeCallback : static fn(SavedItemData $_) => clone $item);
+			$this->map($namespace, $deserializeCallback !== null ? $deserializeCallback : static fn(SavedItemData $_) => clone $item);
 		})->call($deserializer);
 
 		$dictionary = GlobalItemTypeDictionary::getInstance()->getDictionary();
