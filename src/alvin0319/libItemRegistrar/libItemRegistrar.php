@@ -16,7 +16,6 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\item\StringToItemParser;
 use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
-use pocketmine\network\mcpe\convert\ItemTranslator;
 use pocketmine\network\mcpe\convert\ItemTypeDictionaryFromDataHelper;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\AssumptionFailedError;
@@ -145,6 +144,7 @@ final class libItemRegistrar extends PluginBase{
 	 * Returns a next item id and increases it.
 	 *
 	 * @return int
+	 * @deprecated Use {@link ItemTypeIds::newId()} instead.
 	 */
 	public function getNextItemId() : int{
 		return ItemTypeIds::newId();
