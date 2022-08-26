@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace alvin0319\libItemRegistrar;
 
 use pocketmine\block\Block;
-use pocketmine\block\BlockFactory;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\data\bedrock\item\ItemTypeNames;
 use pocketmine\data\bedrock\item\SavedItemData;
@@ -79,10 +78,6 @@ final class libItemRegistrar extends PluginBase{
 		// TODO: Closure hack to access ItemSerializer
 		// ItemSerializer throws an Exception when we try to register a pre-existing item
 		(function() use ($item, $serializeCallback, $namespace) : void{
-//			if(isset($this->itemSerializers[$item->getTypeId()])){
-//				unset($this->itemSerializers[$item->getTypeId()]);
-//			}
-//			$this->map($item, $serializeCallback !== null ? $serializeCallback : static fn() => new SavedItemData($namespace));
 			$this->itemSerializers[$item->getTypeId()][get_class($item)] = $serializeCallback !== null ? $serializeCallback : static fn() => new SavedItemData($namespace);
 		})->call($serializer);
 		// TODO: Closure hack to access ItemDeserializer
@@ -102,46 +97,6 @@ final class libItemRegistrar extends PluginBase{
 		})->call($dictionary);
 	}
 
-//	public function registerBlock(Block $block, bool $force = false, string $namespace = "", ?\Closure $serializeCallback = null, ?\Closure $deserializeCallback = null) : void{
-//		if($serializeCallback !== null){
-//			Utils::validateCallableSignature(static function(Block $block) : BlockStateWriter{ }, $serializeCallback);
-//		}
-//		if($deserializeCallback !== null){
-//			Utils::validateCallableSignature(static function(BlockStateReader $reader) : Block{ }, $deserializeCallback);
-//		}
-//		BlockFactory::getInstance()->register($block, $force);
-//
-//		$namespace = $namespace === "" ? "minecraft:" . strtolower(str_replace(" ", "_", $block->getName())) : $namespace;
-//
-//		$serializer = GlobalBlockStateHandlers::getSerializer();
-//		$deserializer = GlobalBlockStateHandlers::getDeserializer();
-//
-//		assert($serializer instanceof DelegatingBlockStateSerializer);
-//		assert($deserializer instanceof DelegatingBlockStateDeserializer);
-//
-//		(function() use ($block, $serializeCallback, $namespace) : void{
-//			if(isset($this->serializers[$block->getTypeId()])){
-//				unset($this->serializers[$block->getTypeId()]);
-//			}
-//			$this->map($block, $serializeCallback !== null ? $serializeCallback : static fn() => new BlockStateWriter($namespace));
-//		})->call($serializer->getRealSerializer());
-//
-//		(function() use ($block, $deserializeCallback, $namespace) : void{
-//			if(array_key_exists($namespace, $this->deserializeFuncs)){
-//				unset($this->deserializeFuncs[$namespace]);
-//			}
-//			$this->map($namespace, $deserializeCallback !== null ? $deserializeCallback : static fn(BlockStateReader $reader) : Block => clone $block);
-//		})->call($deserializer->getRealDeserializer());
-//
-//		$blockStateDictionary = RuntimeBlockMapping::getInstance()->getBlockStateDictionary();
-//		(function() use ($block, $namespace) : void{
-//			$cache = $this->stateDataToStateIdLookupCache;
-//			(function() use ($block, $namespace) : void{
-//				$this->nameToNetworkIdsLookup[$namespace] = new BlockStateData($namespace, CompoundTag::create(), $block->getStateId());
-//			})->call($cache);
-//		})->call($blockStateDictionary);
-//	}
-
 	/**
 	 * Returns a next item id and increases it.
 	 *
@@ -152,20 +107,8 @@ final class libItemRegistrar extends PluginBase{
 		return ItemTypeIds::newId();
 	}
 
-	public function getNextBlockId() : int{
-		return $this->nextBlockId++;
-	}
-
 	public function getItemByTypeId(int $typeId) : ?Item{
 		return $this->registeredItems[$typeId] ?? null;
-	}
-
-	public function getBlockByTypeId(int $typeId) : ?Block{
-		try{
-			return BlockFactory::getInstance()->fromTypeId($typeId);
-		}catch(\Throwable $e){
-			return $this->registeredBlocks[$typeId] ?? null;
-		}
 	}
 
 	/**
