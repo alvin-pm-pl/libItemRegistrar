@@ -97,7 +97,7 @@ final class libItemRegistrar extends PluginBase{
 		$dictionary = GlobalItemTypeDictionary::getInstance()->getDictionary();
 		(function() use ($item, $runtimeId, $namespace) : void{
 			$this->stringToIntMap[$namespace] = $runtimeId;
-			$this->intToStringMap[$runtimeId] = $namespace;
+			$this->intToStringIdMap[$runtimeId] = $namespace;
 			$this->itemTypes[] = new ItemTypeEntry($namespace, $runtimeId, true);
 		})->call($dictionary);
 	}
