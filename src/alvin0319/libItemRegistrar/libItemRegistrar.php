@@ -14,15 +14,15 @@ use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\item\StringToItemParser;
-use pocketmine\network\mcpe\convert\GlobalItemTypeDictionary;
 use pocketmine\network\mcpe\convert\ItemTypeDictionaryFromDataHelper;
+use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\Utils;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
-use Webmozart\PathUtil\Path;
+use Symfony\Component\Filesystem\Path;
 use function file_get_contents;
 use function json_decode;
 use function str_replace;
@@ -89,7 +89,7 @@ final class libItemRegistrar extends PluginBase{
 			$this->map($namespace, $deserializeCallback !== null ? $deserializeCallback : static fn(SavedItemData $_) => clone $item);
 		})->call($deserializer);
 
-		$dictionary = GlobalItemTypeDictionary::getInstance()->getDictionary();
+		$dictionary = TypeConverter::getInstance()->getItemTypeDictionary();
 		(function() use ($item, $runtimeId, $namespace) : void{
 			$this->stringToIntMap[$namespace] = $runtimeId;
 			$this->intToStringIdMap[$runtimeId] = $namespace;
