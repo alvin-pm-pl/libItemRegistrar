@@ -9,6 +9,7 @@ namespace alvin0319\libItemRegistrar;
 
 use pocketmine\block\Block;
 use pocketmine\block\BlockTypeIds;
+use pocketmine\data\bedrock\BedrockDataFiles;
 use pocketmine\data\bedrock\item\ItemTypeNames;
 use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\item\Item;
@@ -27,7 +28,6 @@ use function file_get_contents;
 use function json_decode;
 use function str_replace;
 use function strtolower;
-use const pocketmine\BEDROCK_DATA_PATH;
 
 final class libItemRegistrar extends PluginBase{
 	use SingletonTrait;
@@ -121,7 +121,7 @@ final class libItemRegistrar extends PluginBase{
 	public function getRuntimeIdByName(string $name) : ?int{
 		static $mappedJson = [];
 		if($mappedJson === []){
-			$mappedJson = $this->reprocessKeys(json_decode(file_get_contents(Path::join(BEDROCK_DATA_PATH, "required_item_list.json")), true));
+			$mappedJson = $this->reprocessKeys(json_decode(file_get_contents(Path::join(BedrockDataFiles::REQUIRED_ITEM_LIST_JSON)), true));
 		}
 		$name = str_replace(" ", "_", strtolower($name));
 		return $mappedJson[$name]["runtime_id"] ?? null;
