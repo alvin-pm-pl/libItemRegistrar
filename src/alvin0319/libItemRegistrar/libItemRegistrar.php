@@ -78,7 +78,7 @@ final class libItemRegistrar extends PluginBase{
 		// TODO: Closure hack to access ItemSerializer
 		// ItemSerializer throws an Exception when we try to register a pre-existing item
 		(function() use ($item, $serializeCallback, $namespace) : void{
-			$this->itemSerializers[$item->getTypeId()][get_class($item)] = $serializeCallback !== null ? $serializeCallback : static fn() => new SavedItemData($namespace);
+			$this->itemSerializers[$item->getTypeId()] = $serializeCallback !== null ? $serializeCallback : static fn() => new SavedItemData($namespace);
 		})->call($serializer);
 		// TODO: Closure hack to access ItemDeserializer
 		// ItemDeserializer throws an Exception when we try to register a pre-existing item
